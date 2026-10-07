@@ -1,38 +1,30 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import localFont from "next/font/local";
+
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
+const spaceGrotesk = localFont({
+  variable: "--font-space-grotesk",
+  display: "swap",
+  src: [
+    { path: "./fonts/SpaceGrotesk-Light.ttf", weight: "300", style: "normal" },
+    { path: "./fonts/SpaceGrotesk-Regular.ttf", weight: "400", style: "normal" },
+    { path: "./fonts/SpaceGrotesk-Medium.ttf", weight: "500", style: "normal" },
+    { path: "./fonts/SpaceGrotesk-SemiBold.ttf", weight: "600", style: "normal" },
+    { path: "./fonts/SpaceGrotesk-Bold.ttf", weight: "700", style: "normal" },
+  ],
 });
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-
 
 export const metadata: Metadata = {
-  title: "Peyyfi | Digital Payments Made Simple",
+  title: "Peyyfi — Join the waitlist",
   description:
-      "Peyyfi is a modern fintech platform that enables secure, fast, and convenient digital payments.",
+    "Join the Peyyfi waitlist for early access to a beautifully simple way to move and manage money.",
+};
 
-}
-
-
-export default function RootLayout({
-  children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html
-      lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
-      <body className="min-h-full flex flex-col">{children}</body>
+    <html lang="en" className={spaceGrotesk.variable}>
+      <body>{children}</body>
     </html>
   );
 }
