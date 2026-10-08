@@ -11,15 +11,7 @@ export default function Home() {
 
       <header className="site-header">
         <div className="brand-lockup" aria-label="Peyyfi">
-          <Image
-            className="brand-icon"
-            src="/peyyfi-icon.png"
-            alt=""
-            width={44}
-            height={44}
-            priority
-          />
-          <span>Peyyfi</span>
+          <span className="brand-wordmark">peyyfi</span>
         </div>
 
         <div className="launch-label">
@@ -55,7 +47,7 @@ export default function Home() {
             <div className="icon-frame-shine" />
             <Image
               className="hero-icon"
-              src="/peyyfi-icon.png"
+              src="/peyyfi-wordmark-icon.png"
               alt=""
               width={1024}
               height={1024}
