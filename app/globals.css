@@ -35,11 +35,11 @@ button { -webkit-tap-highlight-color: transparent; }
 .mail-icon { position: absolute; left: 17px; width: 20px; height: 20px; stroke: var(--muted); stroke-width: 1.65; stroke-linecap: round; stroke-linejoin: round; }
 .form-control input { flex: 1; min-width: 0; height: 49px; padding: 0; border: 0; outline: 0; color: var(--ink); background: transparent; font-size: 14px; }
 .form-control input::placeholder { color: #777a80; opacity: 1; }
-.form-control button { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; gap: 8px; min-height: 50px; padding: 0 21px; border: 0; border-radius: 12px; color: var(--white); background: var(--ink); font-size: 13px; font-weight: 500; white-space: nowrap; cursor: pointer; transition: background 160ms, transform 160ms; }
-.form-control button:hover:not(:disabled) { background: #292929; transform: translateY(-1px); }
+.form-control button { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; gap: 8px; min-height: 50px; padding: 0 21px; border: 0; border-radius: 12px; color: var(--ink); background: var(--brand); font-size: 13px; font-weight: 500; white-space: nowrap; cursor: pointer; transition: background 160ms, transform 160ms; }
+.form-control button:hover:not(:disabled) { background: #e64400; transform: translateY(-1px); }
 .form-control button:focus-visible { outline: 2px solid var(--ink); outline-offset: 3px; }
 .form-control button:disabled { opacity: .7; cursor: wait; }
-.button-spinner { width: 15px; height: 15px; border: 2px solid #ffffff50; border-top-color: var(--white); border-radius: 50%; animation: spin 750ms linear infinite; }
+.button-spinner { width: 15px; height: 15px; border: 2px solid #08080830; border-top-color: var(--ink); border-radius: 50%; animation: spin 750ms linear infinite; }
 .form-note { margin: 13px 0 0 2px; color: var(--muted); font-size: 11px; }
 .form-message { min-height: 0; margin: 8px 0 0 2px; color: var(--muted); font-size: 13px; }
 .form-message:empty { display: none; }
@@ -64,8 +64,12 @@ button { -webkit-tap-highlight-color: transparent; }
 @media (max-width: 420px) { .form-control { display: grid; grid-template-columns: 22px 1fr; padding: 8px; gap: 2px 7px; } .mail-icon { position: static; justify-self: center; width: 18px; height: 18px; } .form-control input { height: 44px; } .form-control button { grid-column: 1 / -1; min-height: 47px; } .app-preview { width: min(100%, 302px); } .preview-backdrop { inset-inline: 12px; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
 
-.site-splash { position: fixed; z-index: 100; inset: 0; display: grid; place-items: center; background: var(--brand); pointer-events: none; animation: splash-away 1s ease-in-out forwards; }
-.splash-lockup { display: flex; flex-direction: column; align-items: center; gap: 16px; }
-.splash-lockup > span { color: var(--white); font-size: 31px; font-weight: 600; letter-spacing: -1.5px; }
-@keyframes splash-away { 0%, 65% { opacity: 1; visibility: visible; } 100% { opacity: 0; visibility: hidden; } }
-@media (prefers-reduced-motion: reduce) { .site-splash { display: none; } }
+.site-splash { position: fixed; z-index: 100; inset: 0; display: grid; place-items: center; pointer-events: none; }
+.splash-backdrop { position: absolute; inset: 0; background: var(--brand); }
+.splash-lockup { position: relative; display: flex; flex-direction: column; align-items: center; gap: 16px; }
+.splash-logo { position: relative; width: 88px; height: 88px; transform-origin: center; will-change: transform; }
+.splash-logo > img { position: absolute; inset: 0; }
+.splash-mark-brand { opacity: 0; }
+.splash-name { color: var(--white); font-size: 31px; font-weight: 600; letter-spacing: -1.5px; }
+.site-splash ~ .waitlist-page .brand-symbol { visibility: hidden; }
+@media (prefers-reduced-motion: reduce) { .site-splash { display: none; } .site-splash ~ .waitlist-page .brand-symbol { visibility: visible; } }

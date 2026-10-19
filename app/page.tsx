@@ -21,7 +21,7 @@ export default function Home() {
   return (
     <main className="waitlist-page">
       <header className="site-header">
-        <div className="brand-lockup" aria-label="Peyyfi"><Image className="brand-symbol" src="/peyyfi-mark.svg" alt="" width={38} height={38} preload /><span>Peyyfi</span></div>
+        <div className="brand-lockup" aria-label="Peyyfi"><Image className="brand-symbol" data-header-logo src="/peyyfi-mark.svg" alt="" width={38} height={38} preload /><span>Peyyfi</span></div>
         <span className="launch-label"><span />Early access</span>
       </header>
       <section className="hero" aria-labelledby="waitlist-heading">
