@@ -15,7 +15,6 @@ export function SplashScreen() {
 
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const animations: Animation[] = [];
-    let timer: number | undefined;
     const finish = () => {
       window.clearTimeout(timer);
       window.removeEventListener("resize", finish);
@@ -23,12 +22,7 @@ export function SplashScreen() {
       setVisible(false);
     };
 
-    if (motion.matches || typeof logo.animate !== "function") {
-      finish();
-      return;
-    }
-
-    timer = window.setTimeout(() => {
+    const timer = window.setTimeout(() => {
       const target = document.querySelector<HTMLElement>("[data-header-logo]");
       if (!target) { finish(); return; }
 
@@ -59,6 +53,11 @@ export function SplashScreen() {
       fade(".splash-mark-brand", [0, 1]);
       void Promise.all(animations.map((animation) => animation.finished)).then(finish, () => {});
     }, 400);
+
+    if (motion.matches || typeof logo.animate !== "function") {
+      finish();
+      return;
+    }
 
     window.addEventListener("resize", finish, { once: true });
     motion.addEventListener("change", finish, { once: true });
