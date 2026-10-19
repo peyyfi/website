@@ -52,7 +52,12 @@ button { -webkit-tap-highlight-color: transparent; }
 .feature-list > span { border: 1px solid var(--line); border-radius: 30px; padding: 7px 12px; color: #50545b; font-size: 11px; background: #ffffff35; }
 .preview-stage { position: relative; display: grid; justify-items: center; padding: 22px 0 14px; }
 .preview-backdrop { position: absolute; inset: 90px -6px 56px; border-radius: 42px; background: #dcdfe3; transform: rotate(-8deg); }
-.app-preview { position: relative; width: 326px; overflow: hidden; border: 7px solid #1f1f1f; border-radius: 43px; background: var(--canvas); box-shadow: 0 22px 55px #08080812, 0 0 0 1px #d8dbdf; transform: rotate(3deg); }
+.app-preview { position: relative; width: 326px; overflow: hidden; border: 7px solid #1f1f1f; border-radius: 43px; background: var(--canvas); box-shadow: 0 22px 55px #08080812, 0 0 0 1px #d8dbdf; transform: rotate(3deg); animation: preview-arrive 420ms cubic-bezier(.22,.61,.36,1) both; }
+.site-splash ~ .waitlist-page .app-preview { animation-play-state: paused; }
+@keyframes preview-arrive {
+  from { opacity: 0; transform: translateY(18px) rotate(5deg) scale(.985); }
+  to { opacity: 1; transform: translateY(0) rotate(3deg) scale(1); }
+}
 .preview-home-screen { display: block; width: 100%; height: auto; }
 .preview-caption { display: flex; align-items: center; gap: 8px; position: relative; margin-top: 23px; color: var(--muted); font-size: 11px; }
 .site-footer { display: flex; justify-content: space-between; gap: 16px; padding-top: 14px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; }
