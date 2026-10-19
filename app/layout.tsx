@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import localFont from "next/font/local";
 
 import "./globals.css";
+import { SplashScreen } from "../components/SplashScreen";
 
 const spaceGrotesk = localFont({
   variable: "--font-space-grotesk",
@@ -24,7 +25,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={spaceGrotesk.variable}>
-      <body>{children}</body>
+      <body><SplashScreen />{children}</body>
     </html>
   );
 }
