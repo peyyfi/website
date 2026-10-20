@@ -50,23 +50,58 @@ button { -webkit-tap-highlight-color: transparent; }
 .success-icon svg { width: 22px; height: 22px; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
 .feature-list { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 35px; }
 .feature-list > span { border: 1px solid var(--line); border-radius: 30px; padding: 7px 12px; color: #50545b; font-size: 11px; background: #ffffff35; }
-.preview-stage { position: relative; display: grid; justify-items: center; padding: 22px 0 14px; }
-.preview-backdrop { position: absolute; inset: 90px -6px 56px; border-radius: 42px; background: #dcdfe3; transform: rotate(-8deg); }
-.app-preview { position: relative; width: 326px; overflow: hidden; border: 7px solid #1f1f1f; border-radius: 43px; background: var(--canvas); box-shadow: 0 22px 55px #08080812, 0 0 0 1px #d8dbdf; transform: rotate(3deg); animation: preview-arrive 420ms cubic-bezier(.22,.61,.36,1) both; }
-.site-splash ~ .waitlist-page .app-preview { animation-play-state: paused; }
-@keyframes preview-arrive {
-  from { opacity: 0; transform: translateY(18px) rotate(5deg) scale(.985); }
-  to { opacity: 1; transform: translateY(0) rotate(3deg) scale(1); }
-}
-.preview-home-screen { display: block; width: 100%; height: auto; }
-.preview-caption { display: flex; align-items: center; gap: 8px; position: relative; margin-top: 23px; color: var(--muted); font-size: 11px; }
+/* A small, living illustration of what the money is for. */
+.life-stage { position: relative; width: 100%; max-width: 490px; justify-self: center; padding: 0 0 18px; }
+.life-art { position: relative; isolation: isolate; aspect-ratio: 480 / 430; }
+.life-halo { position: absolute; z-index: -1; inset: 12% 3% 0; border-radius: 50%; background: radial-gradient(ellipse, #ffe4cf99, #f5e9de55 48%, transparent 70%); }
+.life-illustration { display: block; width: 100%; height: 100%; overflow: visible; }
+.life-note { position: absolute; top: 12%; left: 7%; display: flex; align-items: center; gap: 9px; padding: 12px 16px; border: 1px solid #ffffff; border-radius: 13px 13px 13px 3px; background: #ffffffcf; box-shadow: 0 6px 25px #894c1610; color: #615045; font-size: 12px; letter-spacing: -.02em; animation: life-caption-in 600ms ease both; }
+.life-note-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--brand); box-shadow: 0 0 0 4px #fc4c0210; }
+.life-handwritten { position: absolute; right: 5%; bottom: 5%; color: #987c68; font-family: Georgia, serif; font-size: 21px; font-style: italic; letter-spacing: -.055em; transform: rotate(-9deg); }
+.life-caption { text-align: center; }
+.life-kicker { margin: 8px 0 14px; color: #858078; font-size: 9px; letter-spacing: .14em; font-weight: 500; }
+.life-caption-text { animation: life-caption-in 600ms ease both; }
+.life-caption h2 { margin: 0; font-size: clamp(24px, 2.3vw, 31px); font-weight: 500; letter-spacing: -.055em; line-height: 1.2; }
+.life-caption-text > p { margin: 10px 0 0; color: var(--muted); font-size: 12px; line-height: 1.6; }
+.life-controls { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 22px; }
+.life-moments { display: flex; gap: 3px; padding: 4px; border: 1px solid #d6d8da; border-radius: 30px; background: #ffffff45; }
+.life-moments button { padding: 7px 13px; border: 0; border-radius: 30px; color: #77736e; background: transparent; font-size: 10px; cursor: pointer; transition: background 200ms, color 200ms, box-shadow 200ms; }
+.life-moments button[aria-pressed="true"] { color: #843006; background: #fffaf5; box-shadow: 0 1px 5px #7e4c1412; }
+.life-moments button:hover { color: #843006; }
+.life-pause { display: grid; place-items: center; width: 28px; height: 28px; padding: 7px; border: 1px solid #d6d8da; border-radius: 50%; color: #746c65; background: transparent; cursor: pointer; }
+.life-pause svg { width: 12px; height: 12px; }
+.life-controls button:focus-visible { outline: 2px solid var(--brand); outline-offset: 4px; }
+.life-character { animation: life-bob 4.8s ease-in-out infinite; transform-origin: 210px 340px; }
+.life-companion { animation: life-cuddle 4.8s ease-in-out infinite; transform-origin: 310px 340px; }
+.life-heart { animation: life-heartbeat 2.4s ease-in-out infinite; transform-origin: 291px 129px; }
+.life-eyes { animation: life-blink 5.5s infinite; transform-box: fill-box; transform-origin: center; }
+.life-wave { animation: life-wave 4.8s ease-in-out infinite; transform-origin: 284px 250px; }
+.life-ground { animation: life-shadow 4.8s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+.life-sparkle { animation: life-twinkle 3.2s ease-in-out infinite; }
+.life-dot { animation: life-bob 4s ease-in-out infinite; }
+.life-dot-late { animation-delay: -2s; }
+.life-moment { animation: life-caption-in 700ms ease both; }
+.life-dream { animation: life-dream 5s ease-in-out infinite; transform-origin: 319px 168px; }
+.life-plane { animation: life-fly 5s ease-in-out infinite; }
+.life-stage[data-paused="true"] :is(.life-character, .life-companion, .life-heart, .life-eyes, .life-wave, .life-ground, .life-sparkle, .life-dot, .life-dream, .life-plane) { animation-play-state: paused !important; }
+.site-splash ~ .waitlist-page .life-stage * { animation-play-state: paused; }
+@keyframes life-bob { 0%, 100% { transform: translateY(0) rotate(-2deg); } 50% { transform: translateY(-12px) rotate(2deg); } }
+@keyframes life-cuddle { 0%, 100% { transform: translate(0, 0) rotate(0); } 50% { transform: translate(-9px, -5px) rotate(-7deg); } }
+@keyframes life-heartbeat { 0%, 100% { transform: translateY(0) scale(1) rotate(-8deg); } 50% { transform: translateY(-10px) scale(1.1) rotate(4deg); } }
+@keyframes life-blink { 0%, 43%, 47%, 100% { transform: scaleY(1); } 45% { transform: scaleY(.12); } }
+@keyframes life-wave { 0%, 60%, 100% { transform: rotate(0); } 70%, 85% { transform: rotate(-14deg); } 77%, 92% { transform: rotate(8deg); } }
+@keyframes life-shadow { 0%, 100% { transform: scaleX(1); opacity: .09; } 50% { transform: scaleX(.87); opacity: .06; } }
+@keyframes life-twinkle { 0%, 100% { opacity: .45; } 50% { opacity: 1; } }
+@keyframes life-dream { 0%, 100% { transform: translateY(0) rotate(-9deg); } 50% { transform: translateY(-14px) rotate(9deg); } }
+@keyframes life-fly { 0%, 100% { transform: translate(0, 0) rotate(0); } 50% { transform: translate(13px, -15px) rotate(3deg); } }
+@keyframes life-caption-in { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
 .site-footer { display: flex; justify-content: space-between; gap: 16px; padding-top: 14px; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; }
 .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
 .honeypot { position: absolute !important; left: -9999px !important; width: 1px !important; height: 1px !important; opacity: 0 !important; pointer-events: none !important; }
 @keyframes spin { to { transform: rotate(360deg); } }
-@media (max-width: 1020px) { .hero { grid-template-columns: minmax(0, 1fr) 320px; gap: 28px; } .hero h1 { font-size: clamp(48px, 6.3vw, 66px); } .hero-description { font-size: 15px; } .form-control { flex-wrap: wrap; padding: 8px 8px 8px 43px; } .form-control input { min-width: 130px; } .form-control button { min-width: 0; padding-inline: 13px; } .app-preview { width: 302px; } }
-@media (max-width: 760px) { .waitlist-page { padding: 22px 23px 22px; } .brand-lockup { font-size: 24px; } .brand-symbol { width: 32px; height: 32px; } .launch-label { font-size: 10px; min-height: 31px; } .hero { grid-template-columns: 1fr; gap: 34px; padding: 63px 0 38px; } .hero-copy { max-width: 540px; } .eyebrow { margin-bottom: 20px; font-size: 10px; } .hero h1 { font-size: clamp(48px, 12vw, 78px); } .hero-description { margin-top: 22px; max-width: 440px; font-size: 15px; } .waitlist-form { margin-top: 27px; } .feature-list { margin-top: 25px; } .preview-stage { width: min(100%, 430px); margin-inline: auto; padding-top: 23px; } .preview-backdrop { inset: 75px 8px 65px; } .app-preview { width: 310px; } .site-footer { font-size: 9px; } }
-@media (max-width: 420px) { .form-control { display: grid; grid-template-columns: 22px 1fr; padding: 8px; gap: 2px 7px; } .mail-icon { position: static; justify-self: center; width: 18px; height: 18px; } .form-control input { height: 44px; } .form-control button { grid-column: 1 / -1; min-height: 47px; } .app-preview { width: min(100%, 302px); } .preview-backdrop { inset-inline: 12px; } }
+@media (max-width: 1020px) { .hero { grid-template-columns: minmax(0, 1fr) 320px; gap: 28px; } .hero h1 { font-size: clamp(48px, 6.3vw, 66px); } .hero-description { font-size: 15px; } .form-control { flex-wrap: wrap; padding: 8px 8px 8px 43px; } .form-control input { min-width: 130px; } .form-control button { min-width: 0; padding-inline: 13px; } .life-note { font-size: 10px; padding: 10px 12px; } .life-handwritten { font-size: 18px; } }
+@media (max-width: 760px) { .waitlist-page { padding: 22px 23px 22px; } .brand-lockup { font-size: 24px; } .brand-symbol { width: 32px; height: 32px; } .launch-label { font-size: 10px; min-height: 31px; } .hero { grid-template-columns: 1fr; gap: 34px; padding: 63px 0 38px; } .hero-copy { max-width: 540px; } .eyebrow { margin-bottom: 20px; font-size: 10px; } .hero h1 { font-size: clamp(48px, 12vw, 78px); } .hero-description { margin-top: 22px; max-width: 440px; font-size: 15px; } .waitlist-form { margin-top: 27px; } .feature-list { margin-top: 25px; } .life-stage { width: min(100%, 430px); padding-bottom: 8px; } .life-kicker { margin-top: 2px; } .site-footer { font-size: 9px; } }
+@media (max-width: 420px) { .form-control { display: grid; grid-template-columns: 22px 1fr; padding: 8px; gap: 2px 7px; } .mail-icon { position: static; justify-self: center; width: 18px; height: 18px; } .form-control input { height: 44px; } .form-control button { grid-column: 1 / -1; min-height: 47px; } .life-handwritten { font-size: 17px; } .life-caption-text > p { font-size: 11px; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
 
 .site-splash { position: fixed; z-index: 100; inset: 0; display: grid; place-items: center; pointer-events: none; }
