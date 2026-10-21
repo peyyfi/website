@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { FormEvent, useRef, useState } from "react";
 
 type FormStatus = "idle" | "submitting" | "success" | "error";
 
@@ -8,10 +8,32 @@ export function WaitlistForm() {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<FormStatus>("idle");
   const [message, setMessage] = useState("");
+  const [emailInvalid, setEmailInvalid] = useState(false);
+  const emailRef = useRef<HTMLInputElement>(null);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (status === "submitting") return;
+
+    const normalizedEmail = email.trim();
+    if (
+      !normalizedEmail ||
+      normalizedEmail.length > 254 ||
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)
+    ) {
+      setStatus("error");
+      setEmailInvalid(true);
+      setMessage(
+        normalizedEmail
+          ? "Enter a valid email address, like you@example.com."
+          : "Enter your email address to join the waitlist.",
+      );
+      emailRef.current?.focus();
+      return;
+    }
+
     setStatus("submitting");
+    setEmailInvalid(false);
     setMessage("");
 
     const form = new FormData(event.currentTarget);
@@ -21,7 +43,7 @@ export function WaitlistForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email,
+          email: normalizedEmail,
           company: form.get("company"),
         }),
       });
@@ -61,26 +83,34 @@ export function WaitlistForm() {
   }
 
   return (
-    <form className="waitlist-form" onSubmit={handleSubmit} noValidate>
-      <label className="sr-only" htmlFor="waitlist-email">
+    <form className="waitlist-form" onSubmit={handleSubmit} noValidate aria-busy={status === "submitting"}>
+      <label className="form-label" htmlFor="waitlist-email">
         Email address
       </label>
-      <div className="form-control">
+      <div className={`form-control${emailInvalid ? " has-error" : ""}`}>
         <svg className="mail-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true">
           <path d="M3.75 6.75h16.5v10.5H3.75z" />
           <path d="m4.5 7.5 7.5 5.25 7.5-5.25" />
         </svg>
         <input
           id="waitlist-email"
+          ref={emailRef}
           name="email"
           type="email"
           inputMode="email"
           autoComplete="email"
           placeholder="you@email.com"
           value={email}
-          onChange={(event) => setEmail(event.target.value)}
-          aria-describedby={message ? "form-message" : undefined}
-          aria-invalid={status === "error"}
+          onChange={(event) => {
+            setEmail(event.target.value);
+            if (status === "error") {
+              setStatus("idle");
+              setMessage("");
+              setEmailInvalid(false);
+            }
+          }}
+          aria-describedby={message ? "form-message waitlist-note" : "waitlist-note"}
+          aria-invalid={emailInvalid}
           required
         />
         <input
@@ -110,6 +140,7 @@ export function WaitlistForm() {
       >
         {message}
       </p>
+      <p className="form-note" id="waitlist-note">Be first in line. Product updates only, no noise.</p>
     </form>
   );
 }

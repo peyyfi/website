@@ -1,6 +1,6 @@
 import Image from "next/image";
 import { WaitlistForm } from "./waitlist-form";
-import { LifeInMotion } from "../components/LifeInMotion";
+import { WalletPreview } from "../components/WalletPreview";
 
 export default function Home() {
   return (
@@ -11,14 +11,13 @@ export default function Home() {
       </header>
       <section className="hero" aria-labelledby="waitlist-heading">
         <div className="hero-copy">
-          <p className="eyebrow"><span />Money, made simple</p>
+          <p className="eyebrow">Your everyday stablecoin wallet</p>
           <h1 id="waitlist-heading">Your money,<br /><span>made simple.</span></h1>
-          <p className="hero-description">Your wallet, stablecoins, and virtual cards—all in one place. A simpler way to move and manage your money is coming.</p>
+          <p className="hero-description">Hold USDC and USDT, send money, and spend with virtual cards. One wallet for your everyday.</p>
           <WaitlistForm />
-          <p className="form-note">Be first in line. Product updates only, no noise.</p>
-          <div className="feature-list" aria-label="Peyyfi features"><span>One wallet</span><span>Easy transfers</span><span>Virtual cards</span></div>
+          <ul className="feature-list" aria-label="Peyyfi features"><li>One wallet</li><li>Easy transfers</li><li>Virtual cards</li></ul>
         </div>
-        <LifeInMotion />
+        <WalletPreview />
       </section>
       <footer className="site-footer"><span>© {new Date().getFullYear()} Peyyfi</span><span>Money in motion. Life in focus.</span></footer>
     </main>
