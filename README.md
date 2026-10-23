@@ -20,6 +20,21 @@ You can start editing the page by modifying `app/page.tsx`. The page auto-update
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Search and sharing
+
+The production canonical URL defaults to `https://www.peyyfi.io/`. Set `SITE_URL`
+in the Next.js environment if the public domain changes. It is shared by the
+canonical tag, Open Graph metadata, organization/website structured data and sitemap.
+
+Next.js serves `/robots.txt`, `/sitemap.xml`, `/manifest.webmanifest` and a
+1200 × 630 `/opengraph-image` sharing card. The header, splash, browser icons and
+sharing card use the current mobile app icon. Vercel preview deployments are
+marked `noindex` and excluded from the sitemap.
+
+After deployment, submit `https://www.peyyfi.io/sitemap.xml` in Google Search
+Console and request indexing of the homepage. The local changes take effect on
+the public site when this Next.js project is deployed.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

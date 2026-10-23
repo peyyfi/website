@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 
 import "./globals.css";
 import { SplashScreen } from "../components/SplashScreen";
+import { isPreview, site } from "../lib/site";
 
 const spaceGrotesk = localFont({
   variable: "--font-space-grotesk",
@@ -17,9 +18,32 @@ const spaceGrotesk = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "Peyyfi — Join the waitlist",
-  description:
-    "Join the Peyyfi waitlist for early access to a beautifully simple way to move and manage money.",
+  metadataBase: new URL(site.url),
+  applicationName: site.name,
+  title: site.title,
+  description: site.description,
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    url: site.url,
+    siteName: site.name,
+    title: site.title,
+    description: site.description,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: site.title,
+    description: site.description,
+  },
+  robots: {
+    index: !isPreview,
+    follow: !isPreview,
+    googleBot: {
+      index: !isPreview,
+      follow: !isPreview,
+      "max-image-preview": "large",
+    },
+  },
 };
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {

@@ -29,7 +29,7 @@ export function WalletPreview() {
       <figcaption className="wallet-preview-caption">
         <div className="stablecoin-backing">
           <span className="stablecoin-logos" aria-hidden="true"><Image src="/icons/usdc.svg" alt="" width={25} height={25} /><Image src="/icons/usdt.svg" alt="" width={25} height={25} /></span>
-          <span>Backed by <strong>USDC</strong> &amp; <strong>USDT</strong></span>
+          <span>Built for <strong>USDC</strong> &amp; <strong>USDT</strong></span>
         </div>
         <p className="preview-disclaimer">Product preview · Illustrative balances</p>
       </figcaption>

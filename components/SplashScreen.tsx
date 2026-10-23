@@ -49,8 +49,6 @@ export function SplashScreen() {
       };
       fade(".splash-backdrop", [1, 0]);
       fade(".splash-name", [1, 0, 0]);
-      fade(".splash-mark-light", [1, 0]);
-      fade(".splash-mark-brand", [0, 1]);
       void Promise.all(animations.map((animation) => animation.finished)).then(finish, () => {});
     }, 400);
 
@@ -76,8 +74,7 @@ export function SplashScreen() {
       <div className="splash-backdrop" />
       <div className="splash-lockup">
         <div ref={logoRef} className="splash-logo">
-          <Image className="splash-mark-light" src="/peyyfi-mark-reverse.svg" alt="" width={88} height={88} preload />
-          <Image className="splash-mark-brand" src="/peyyfi-mark.svg" alt="" width={88} height={88} preload />
+          <Image src="/peyyfi-icon.png" alt="" width={88} height={88} preload />
         </div>
         <span className="splash-name">Peyyfi</span>
       </div>
