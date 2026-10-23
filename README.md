@@ -1,24 +1,23 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Peyyfi waitlist
 
-## Getting Started
+The repository contains the Next.js waitlist website. Its Django backend lives
+separately in `dev/Backend/waitlist-service` and stores signups in MongoDB.
 
-First, run the development server:
+The signup form accepts an email address or a phone number in one field. When
+entering a phone number, the country selector shows flags and defaults to
+Ghana (`+233`). Visitors can choose another country; phone numbers are validated
+and sent to Django in international format.
+
+## Frontend
+
+Copy `.env.example` to `.env.local`, then set `WAITLIST_API_SECRET` to the same
+value used by Django.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
 pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+Open [http://localhost:3000](http://localhost:3000).
 
 ## Search and sharing
 
@@ -35,17 +34,35 @@ After deployment, submit `https://www.peyyfi.io/sitemap.xml` in Google Search
 Console and request indexing of the homepage. The local changes take effect on
 the public site when this Next.js project is deployed.
 
-## Learn More
+## Backend
 
-To learn more about Next.js, take a look at the following resources:
+The Django service lives in
+[`../../Backend/waitlist-service/`](../../Backend/waitlist-service). From this
+website's root folder, run it locally with:
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+cd ../../Backend/waitlist-service
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -r requirements.txt
+docker compose up -d mongo
+cp .env.example .env
+# Edit .env, then load the MongoDB connection and shared API secret.
+set -a
+source .env
+set +a
+python manage.py migrate
+python manage.py runserver
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+The frontend keeps `/api/waitlist` as its public endpoint and forwards valid
+submissions to Django over the server-side `WAITLIST_API_URL`. Browser clients
+never receive the shared API secret.
 
-## Deploy on Vercel
+## Checks
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```bash
+pnpm lint
+pnpm build
+(cd ../../Backend/waitlist-service && .venv/bin/python manage.py test waitlist)
+```

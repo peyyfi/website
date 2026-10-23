@@ -7,7 +7,7 @@ import { ArrowRight01Icon } from "@hugeicons/core-free-icons";
 
 export function HomeScreenPreview() {
   function focusWaitlist(event: MouseEvent<HTMLAnchorElement>) {
-    const input = document.getElementById("waitlist-email");
+    const input = document.querySelector(".waitlist-form input:not(.honeypot)");
     if (input instanceof HTMLInputElement && !event.metaKey && !event.ctrlKey && !event.shiftKey && !event.altKey) {
       event.preventDefault();
       document.getElementById("join-waitlist")?.scrollIntoView({ block: "start" });

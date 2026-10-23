@@ -64,8 +64,8 @@ export default function Home() {
       <section className="waitlist-faq" aria-labelledby="faq-heading">
         <h2 id="faq-heading">Before you join</h2>
         <details><summary>What is Peyyfi?</summary><p>Peyyfi is an upcoming stablecoin wallet bringing USDC, USDT, transfers and virtual cards into one app.</p></details>
-        <details><summary>Is the Peyyfi app available yet?</summary><p>This page is for the early-access waitlist. Leave your email and we’ll keep you informed about product updates and launch news.</p></details>
-        <details><summary>How do I join the waitlist?</summary><p>Enter your email in the form above and select “Join the waitlist”. You’ll see a confirmation once your signup is saved.</p></details>
+        <details><summary>Is the Peyyfi app available yet?</summary><p>This page is for the early-access waitlist. Leave your email address or phone number and we’ll keep you informed about product updates and launch news.</p></details>
+        <details><summary>How do I join the waitlist?</summary><p>Enter your email address or phone number in the form above and select “Join the waitlist”. For phone signups, Ghana (+233) is selected by default and you can choose another country. You’ll see a confirmation once your signup is saved.</p></details>
       </section>
       <footer className="site-footer"><span>© {new Date().getFullYear()} Peyyfi</span><span>Money in motion. Life in focus.</span></footer>
     </main>
