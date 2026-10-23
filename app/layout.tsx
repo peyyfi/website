@@ -23,6 +23,9 @@ export const metadata: Metadata = {
   title: site.title,
   description: site.description,
   alternates: { canonical: "/" },
+  verification: {
+    google: "0s0W4qJ1RMTNy1eP7L5ft1KKvPlfhF-OfgSPW7Sw3GM",
+  },
   openGraph: {
     type: "website",
     url: site.url,
