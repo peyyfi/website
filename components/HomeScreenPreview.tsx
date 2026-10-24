@@ -17,10 +17,10 @@ export function HomeScreenPreview() {
 
   return (
     <section id="right-at-home" className="home-screen-preview" aria-labelledby="home-screen-heading">
-      <p className="eyebrow">A little space. Everyday possibility.</p>
-      <h2 id="home-screen-heading">Right at home.</h2>
-      <p className="home-screen-description">Peyyfi, alongside your everyday essentials.</p>
-      <figure className="home-screen-figure">
+      <p className="eyebrow" data-scroll-reveal="">A little space. Everyday possibility.</p>
+      <h2 id="home-screen-heading" data-scroll-reveal="">Right at home.</h2>
+      <p className="home-screen-description" data-scroll-reveal="">Peyyfi, alongside your everyday essentials.</p>
+      <figure className="home-screen-figure" data-scroll-reveal="">
         <Image
           className="home-screen-image"
           src="/images/peyyfi-home-screen.png"

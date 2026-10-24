@@ -13,12 +13,18 @@ export function SplashScreen() {
     const logo = logoRef.current;
     if (!splash || !logo) return;
 
+    let active = true;
+    const root = document.documentElement;
+    root.dataset.heroEntrance = "pending";
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const animations: Animation[] = [];
     const finish = () => {
+      if (!active) return;
       window.clearTimeout(timer);
+      window.clearTimeout(fallbackTimer);
       window.removeEventListener("resize", finish);
       motion.removeEventListener("change", finish);
+      root.dataset.heroEntrance = "ready";
       setVisible(false);
     };
 
@@ -49,21 +55,25 @@ export function SplashScreen() {
       };
       fade(".splash-backdrop", [1, 0]);
       fade(".splash-name", [1, 0, 0]);
-      void Promise.all(animations.map((animation) => animation.finished)).then(finish, () => {});
+      void Promise.all(animations.map((animation) => animation.finished)).then(finish, finish);
     }, 400);
+    const fallbackTimer = window.setTimeout(finish, 1400);
 
     if (motion.matches || typeof logo.animate !== "function") {
       finish();
-      return;
+    } else {
+      window.addEventListener("resize", finish, { once: true });
+      motion.addEventListener("change", finish, { once: true });
     }
 
-    window.addEventListener("resize", finish, { once: true });
-    motion.addEventListener("change", finish, { once: true });
     return () => {
+      active = false;
       window.clearTimeout(timer);
+      window.clearTimeout(fallbackTimer);
       window.removeEventListener("resize", finish);
       motion.removeEventListener("change", finish);
       animations.forEach((animation) => animation.cancel());
+      delete root.dataset.heroEntrance;
     };
   }, []);
 

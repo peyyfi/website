@@ -3,6 +3,7 @@ import Link from "next/link";
 import { WaitlistForm } from "./waitlist-form";
 import { WalletPreview } from "../components/WalletPreview";
 import { HomeScreenPreview } from "../components/HomeScreenPreview";
+import { ScrollReveals } from "../components/ScrollReveals";
 import { site } from "../lib/site";
 
 const structuredData = {
@@ -36,6 +37,7 @@ const structuredData = {
 export default function Home() {
   return (
     <main className="waitlist-page">
+      <ScrollReveals />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }} />
       <header className="site-header">
         <Link className="brand-lockup" href="/" aria-label="Peyyfi home"><Image className="brand-symbol" data-header-logo src={site.logo} alt="" width={38} height={38} preload /><span>Peyyfi</span></Link>
@@ -44,24 +46,24 @@ export default function Home() {
       <section className="hero" aria-labelledby="waitlist-heading">
         <div className="hero-copy">
           <p className="eyebrow">Your everyday USDC &amp; USDT wallet</p>
-          <h1 id="waitlist-heading">Your money,<br /><span>made simple.</span></h1>
-          <p className="hero-description">A stablecoin wallet for holding USDC and USDT, sending money and spending with virtual cards. Join the waitlist for early access to Peyyfi.</p>
-          <div id="join-waitlist" className="waitlist-anchor"><WaitlistForm /></div>
+          <h1 id="waitlist-heading" data-hero-reveal="headline">Your money,<br /><span>made simple.</span></h1>
+          <p className="hero-description" data-hero-reveal="description">A stablecoin wallet for holding USDC and USDT, sending money and spending with virtual cards. Join the waitlist for early access to Peyyfi.</p>
+          <div id="join-waitlist" className="waitlist-anchor" data-hero-reveal="form"><WaitlistForm /></div>
           <ul className="feature-list" aria-label="Peyyfi features"><li>One wallet</li><li>Easy transfers</li><li>Virtual cards</li></ul>
         </div>
         <WalletPreview />
       </section>
       <HomeScreenPreview />
       <section className="product-details" aria-labelledby="product-heading">
-        <p className="eyebrow">Meet Peyyfi</p>
-        <h2 id="product-heading">Stablecoins, transfers and virtual cards.<br />Together in one wallet.</h2>
+        <p className="eyebrow" data-scroll-reveal="">Meet Peyyfi</p>
+        <h2 id="product-heading" data-scroll-reveal="">Stablecoins, transfers and virtual cards.<br />Together in one wallet.</h2>
         <div className="product-grid">
-          <article><h3>A wallet for USDC and USDT</h3><p>Peyyfi is being built to help you hold and manage your stablecoins in one place, with a clear view of your balances.</p></article>
-          <article><h3>Send money simply</h3><p>Keep transfers and transaction activity together, so you can follow where your money goes from the same wallet.</p></article>
-          <article><h3>Virtual cards for everyday spending</h3><p>Manage your wallet and virtual cards in one app. Join the waitlist to hear more as Peyyfi gets ready to launch.</p></article>
+          <article data-scroll-reveal=""><h3>A wallet for USDC and USDT</h3><p>Peyyfi is being built to help you hold and manage your stablecoins in one place, with a clear view of your balances.</p></article>
+          <article data-scroll-reveal=""><h3>Send money simply</h3><p>Keep transfers and transaction activity together, so you can follow where your money goes from the same wallet.</p></article>
+          <article data-scroll-reveal=""><h3>Virtual cards for everyday spending</h3><p>Manage your wallet and virtual cards in one app. Join the waitlist to hear more as Peyyfi gets ready to launch.</p></article>
         </div>
       </section>
-      <section className="waitlist-faq" aria-labelledby="faq-heading">
+      <section className="waitlist-faq" aria-labelledby="faq-heading" data-scroll-reveal="">
         <h2 id="faq-heading">Before you join</h2>
         <details><summary>What is Peyyfi?</summary><p>Peyyfi is an upcoming stablecoin wallet bringing USDC, USDT, transfers and virtual cards into one app.</p></details>
         <details><summary>Is the Peyyfi app available yet?</summary><p>This page is for the early-access waitlist. Leave your email address or phone number and we’ll keep you informed about product updates and launch news.</p></details>

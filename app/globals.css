@@ -34,6 +34,12 @@ button { -webkit-tap-highlight-color: transparent; }
 .eyebrow { margin: 0 0 22px; color: var(--brand-text); font-size: 12px; font-weight: 500; letter-spacing: .07em; text-transform: uppercase; }
 .hero h1 { margin: 0; font-size: clamp(56px, 6vw, 84px); font-weight: 600; line-height: 1.02; letter-spacing: -.065em; }
 .hero-description { max-width: 460px; margin: 25px 0 0; color: var(--muted); font-size: 17px; line-height: 1.65; letter-spacing: -.02em; }
+html[data-hero-entrance="pending"] [data-hero-reveal] { opacity: 0; transform: translateY(18px); }
+html[data-hero-entrance="ready"] [data-hero-reveal] { animation: hero-entrance 650ms cubic-bezier(.22, .61, .36, 1) var(--hero-delay, 0ms) both; }
+[data-hero-reveal="description"] { --hero-delay: 140ms; }
+[data-hero-reveal="form"] { --hero-delay: 280ms; }
+.hero-copy [data-hero-reveal]:focus-within { animation: none; opacity: 1; transform: none; }
+@keyframes hero-entrance { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
 .waitlist-form { margin-top: 30px; max-width: 520px; container-type: inline-size; }
 .form-label { display: block; margin-bottom: 9px; color: #42464c; font-size: 13px; font-weight: 500; }
 .country-select:focus-visible { outline: 2px solid var(--brand-text); outline-offset: 2px; }
@@ -45,8 +51,11 @@ button { -webkit-tap-highlight-color: transparent; }
 .mail-icon { position: absolute; left: 17px; width: 20px; height: 20px; stroke: var(--muted); stroke-width: 1.65; stroke-linecap: round; stroke-linejoin: round; }
 .form-control input { flex: 1; min-width: 0; height: 49px; padding: 0; border: 0; outline: 0; color: var(--ink); background: transparent; font-size: 16px; }
 .form-control input::placeholder { color: #777a80; opacity: 1; }
-.form-control button { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; gap: 8px; min-height: 50px; padding: 0 21px; border: 0; border-radius: 12px; color: var(--on-brand); background: var(--brand); font-size: 14px; font-weight: 500; white-space: nowrap; cursor: pointer; transition: background 160ms, transform 160ms; }
-.form-control button:hover:not(:disabled) { background: #e64400; transform: translateY(-1px); }
+.form-control button { display: inline-flex; align-items: center; justify-content: center; flex: 0 0 auto; gap: 8px; min-height: 50px; padding: 0 21px; border: 0; border-radius: 12px; color: var(--on-brand); background: var(--brand); font-size: 14px; font-weight: 500; white-space: nowrap; cursor: pointer; transition: background 160ms, transform 160ms, box-shadow 160ms; }
+@media (hover: hover) and (pointer: fine) {
+  .form-control button:hover:not(:disabled) { background: #e64400; transform: translateY(-2px); box-shadow: 0 6px 14px #fc4c022e; }
+}
+.form-control button:active:not(:disabled) { background: #d93f00; transform: translateY(1px) scale(.98); box-shadow: inset 0 2px 3px #08080820; transition-duration: 80ms; }
 .form-control button:focus-visible { outline: 2px solid var(--brand-text); outline-offset: 3px; }
 .form-control button:disabled { opacity: .7; cursor: wait; }
 .button-spinner { width: 15px; height: 15px; border: 2px solid #08080830; border-top-color: var(--ink); border-radius: 50%; animation: spin 750ms linear infinite; }
@@ -62,6 +71,9 @@ button { -webkit-tap-highlight-color: transparent; }
 .feature-list { display: flex; flex-wrap: wrap; gap: 12px 28px; margin: 28px 0 0; padding-left: 16px; list-style: disc; color: #50545b; font-size: 12px; }
 .feature-list li::marker { color: var(--brand-text); font-size: 10px; }
 .waitlist-anchor { scroll-margin-top: 32px; }
+[data-scroll-reveal="pending"] { opacity: 0; transform: translateY(32px); }
+[data-scroll-reveal="visible"] { animation: section-reveal 750ms cubic-bezier(.22, .61, .36, 1) both; }
+@keyframes section-reveal { from { opacity: 0; transform: translateY(32px); } to { opacity: 1; transform: none; } }
 .home-screen-preview { width: min(100%, 1260px); margin-inline: auto; padding: 48px 0 32px; border-top: 1px solid var(--line); text-align: center; }
 .home-screen-preview .eyebrow { margin-bottom: 16px; }
 .home-screen-preview h2 { margin: 0; font-size: clamp(44px, 5.3vw, 76px); font-weight: 600; line-height: 1.05; letter-spacing: -.06em; }
@@ -69,8 +81,11 @@ button { -webkit-tap-highlight-color: transparent; }
 .home-screen-figure { display: flex; justify-content: center; margin: 0; }
 .home-screen-image { flex: 0 0 auto; width: 480px; max-width: none; height: auto; }
 .home-screen-footer { padding-top: 18px; border-top: 1px solid var(--line); }
-.home-screen-link { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; color: var(--brand-text); font-size: 16px; font-weight: 500; text-decoration: none; text-underline-offset: 5px; }
-.home-screen-link:hover { text-decoration: underline; }
+.home-screen-link { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 44px; color: var(--brand-text); font-size: 16px; font-weight: 500; text-decoration: none; text-underline-offset: 5px; transition: transform 160ms; }
+@media (hover: hover) and (pointer: fine) {
+  .home-screen-link:hover { text-decoration: underline; transform: translateY(-2px); }
+}
+.home-screen-link:active { transform: translateY(1px) scale(.98); transition-duration: 80ms; }
 .home-screen-link:focus-visible { outline: 2px solid var(--brand-text); outline-offset: 4px; border-radius: 4px; }
 .home-screen-footer p { margin: 0; color: var(--muted); font-size: 12px; line-height: 1.5; }
 @media (max-width: 480px) {
@@ -169,6 +184,9 @@ button { -webkit-tap-highlight-color: transparent; }
   .site-footer { flex-wrap: wrap; gap: 8px; line-height: 1.5; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; } }
+@media (prefers-reduced-motion: reduce) { [data-scroll-reveal] { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { html[data-hero-entrance] [data-hero-reveal] { opacity: 1; transform: none; } }
+@media (prefers-reduced-motion: reduce) { .form-control button, .home-screen-link { transform: none !important; } }
 
 .site-splash { position: fixed; z-index: 100; inset: 0; display: grid; place-items: center; pointer-events: none; animation: splash-fallback 0s 1.2s forwards; }
 .splash-backdrop { position: absolute; inset: 0; background: var(--brand); }
