@@ -16,7 +16,7 @@
   --success: #207044;
 }
 * { box-sizing: border-box; }
-html { min-height: 100%; background: var(--canvas); }
+html { min-height: 100%; background: var(--canvas); scroll-behavior: smooth; }
 body { margin: 0; color: var(--ink); background: var(--canvas); font-family: var(--font-space-grotesk), Arial, sans-serif; }
 button, input, select { font: inherit; }
 button { -webkit-tap-highlight-color: transparent; }
