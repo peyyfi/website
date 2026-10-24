@@ -63,6 +63,7 @@ export async function POST(request: Request) {
     });
     const result = (await backendResponse.json().catch(() => ({}))) as {
       message?: string;
+      created?: boolean;
     };
 
     if (!backendResponse.ok) {
@@ -81,7 +82,11 @@ export async function POST(request: Request) {
       );
     }
 
-    return Response.json({ message: result.message ?? "You’re on the list." });
+    return Response.json({
+      message: result.created === false
+        ? `This ${email ? "email address" : "phone number"} is already on the waitlist.`
+        : result.message ?? "You’re on the list.",
+    });
   } catch {
     return Response.json(
       { message: "We couldn’t add you just yet. Please try again." },
