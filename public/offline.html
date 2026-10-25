@@ -29,10 +29,23 @@
     button:disabled { opacity: .5; cursor: default; }
     .help { margin: 16px 0 0; font-size: 12px; color: #50545b; line-height: 1.6; }
     #message { min-height: 24px; margin: 12px 0 0; font-size: 14px; font-weight: 600; }
+    .auto-return { position: sticky; top: 12px; z-index: 1; display: flex; align-items: center; gap: 16px; margin-bottom: 24px; padding: 16px; border: 1px solid #ffd7c4; border-radius: 14px; background: #fff0e8; }
+    .auto-return[hidden] { display: none; }
+    .auto-return p { flex: 1; margin: 0; font-size: 13px; line-height: 1.6; }
+    .auto-return button { flex-shrink: 0; }
+    .leaderboard { margin-top: 28px; padding-top: 20px; border-top: 1px solid #cdd1d7; }
+    .leaderboard h2 { margin: 0 0 8px; font-size: 18px; letter-spacing: -.04em; }
+    .leaderboard ol { margin: 16px 0; padding-left: 24px; font-size: 13px; font-variant-numeric: tabular-nums; }
+    .leaderboard li { padding: 10px 0 10px 4px; border-bottom: 1px solid #d4d7dc; }
+    .leaderboard li strong { float: right; margin-left: 12px; }
+    .leaderboard p { margin: 8px 0; color: #50545b; font-size: 12px; line-height: 1.6; }
+    #score-sync-status { color: #42464c; }
     .connection { display: flex; align-items: center; gap: 8px; margin: 30px 0 12px; font-size: 12px; color: #50545b; }
     .dot { width: 7px; height: 7px; border-radius: 50%; background: #b33400; }
     .connected .dot { background: #207044; }
-    #return { display: inline-block; min-height: 44px; padding: 12px 0; color: #b33400; font-size: 14px; text-underline-offset: 4px; }
+    #return { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 12px 0; color: #b33400; font-size: 14px; text-underline-offset: 4px; }
+    .return-countdown { min-width: 32px; padding: 4px 6px; border-radius: 6px; color: #b33400; background: #fff0e8; font-weight: 600; font-variant-numeric: tabular-nums; text-align: center; }
+    .return-countdown[hidden] { display: none; }
     body.embedded { min-height: 0; padding: 24px; }
     .embedded .brand, .embedded .connection, .embedded #return { display: none; }
     .embedded h1 { font-size: clamp(32px, 6vw, 44px); }
@@ -42,6 +55,10 @@
 <body>
   <main>
     <p class="brand">peyyfi<span>.</span></p>
+    <aside id="auto-return-banner" class="auto-return" aria-label="Return home" hidden>
+      <p id="auto-return-text" role="status" aria-live="polite"></p>
+      <button id="stay-here" type="button">Stay here</button>
+    </aside>
     <p class="eyebrow">A little play break</p>
     <h1>Keep the good<br>things moving.</h1>
     <p class="description">Meet Peyyfi Jump. Hop over the hurdles, beat your best and keep going while your internet catches up.</p>
@@ -50,14 +67,195 @@
     <p id="message" role="status" aria-live="polite">Ready when you are.</p>
     <div class="controls"><button id="jump" type="button">Start game</button><button id="pause" type="button" disabled>Pause</button></div>
     <p class="help">Space / ↑ or tap to jump · P to pause · Your best score stays on this device.</p>
+    <section class="leaderboard" aria-labelledby="leaderboard-title">
+      <h2 id="leaderboard-title">Top three · All time</h2>
+      <p id="player-name">Play for a place on the leaderboard.</p>
+      <ol id="leaderboard"><li>Be one of the first</li><li>Be one of the first</li><li>Be one of the first</li></ol>
+      <p id="leaderboard-updated">Connect to load the latest top three.</p>
+      <p id="score-sync-status" role="status" aria-live="polite">Your best score syncs when you reconnect.</p>
+    </section>
     <p id="connection" class="connection" role="status"><span class="dot"></span><span id="connection-text">You’re offline. The game is ready to play.</span></p>
-    <a id="return" href="/">Return to the waitlist →</a>
+    <a id="return" href="/">Return to waitlist <span id="return-countdown" class="return-countdown" hidden></span></a>
     <noscript><p>Enable JavaScript to play. You can return to the waitlist when your connection is back.</p></noscript>
   </main>
+  <script id="auto-return">
+    function createAutoReturn({ online, visible, onChange, onReturn }) {
+      const delay = 10;
+      let sawOffline = !online;
+      let playing = false;
+      let cancelled = false;
+      let seconds = null;
+      let timer;
+      const eligible = () => online && sawOffline && visible && !playing && !cancelled;
+      function stop() {
+        clearInterval(timer);
+        timer = undefined;
+        if (seconds !== null) { seconds = null; onChange(null); }
+      }
+      function update() {
+        if (!eligible()) { stop(); return; }
+        if (timer !== undefined) return;
+        seconds = delay;
+        onChange(seconds);
+        timer = setInterval(() => {
+          if (!eligible()) { stop(); return; }
+          seconds -= 1;
+          if (seconds === 0) {
+            sawOffline = false;
+            stop();
+            onReturn();
+          } else onChange(seconds);
+        }, 1000);
+      }
+      update();
+      return {
+        setOnline(value) {
+          if (online === value) return;
+          online = value;
+          if (!online) { sawOffline = true; cancelled = false; }
+          update();
+        },
+        setPlaying(value) { playing = value; update(); },
+        setVisible(value) { visible = value; update(); },
+        stay() { cancelled = true; update(); },
+      };
+    }
+  </script>
+  <script id="score-sync">
+    // The best score is the durable outbox: retain it until the server acknowledges it.
+    function createLeaderboard(onBest) {
+      const BEST_KEY = "peyyfi-jump-best";
+      const PLAYER_KEY = "peyyfi-jump-player";
+      const BOARD_KEY = "peyyfi-jump-leaderboard";
+      const MAX_SCORE = 864000;
+      const status = document.getElementById("score-sync-status");
+      const list = document.getElementById("leaderboard");
+      const updated = document.getElementById("leaderboard-updated");
+      const identity = document.getElementById("player-name");
+      let persistent = true;
+      function read(key) {
+        try { return JSON.parse(localStorage.getItem(key)); } catch { return null; }
+      }
+      function save(key, value) {
+        try { localStorage.setItem(key, JSON.stringify(value)); } catch { persistent = false; }
+      }
+      const validScore = (value) => Number.isInteger(value) && value >= 0 && value <= MAX_SCORE;
+      const validName = (value) => typeof value === "string" && /^Runner [0-9A-F]{8}$/.test(value);
+      const validPlayer = (value) => value && typeof value.id === "string" && /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(value.id);
+      let player = read(PLAYER_KEY);
+      if (!validPlayer(player)) {
+        player = { id: crypto.randomUUID(), synced: 0, name: "" };
+        save(PLAYER_KEY, player);
+      }
+      if (!validScore(player.synced)) player.synced = 0;
+      if (!validName(player.name)) player.name = "";
+      let best = validScore(read(BEST_KEY)) ? read(BEST_KEY) : 0;
+      let board = read(BOARD_KEY);
+      let busy = false;
+      let retryTimer;
+      const validBoard = (value) => Array.isArray(value) && value.length <= 3 && value.every((row) => row && validName(row.name) && validScore(row.score) && row.score > 0);
+      if (!board || !validBoard(board.rows) || !Number.isFinite(board.at)) board = null;
+
+      function render() {
+        identity.textContent = player.name ? "Playing as " + player.name : "You’ll get an anonymous player name when your first score syncs.";
+        list.replaceChildren();
+        for (let index = 0; index < 3; index++) {
+          const row = board && board.rows[index];
+          const item = document.createElement("li");
+          const name = document.createElement("span");
+          const score = document.createElement("strong");
+          name.textContent = row ? row.name + (row.name === player.name ? " (you)" : "") : "Be one of the first";
+          score.textContent = row ? String(row.score).padStart(5, "0") : "—";
+          item.append(name, score);
+          list.append(item);
+        }
+        updated.textContent = board ? (navigator.onLine ? "Last updated " : "Saved leaderboard · ") + new Date(board.at).toLocaleString() : "Connect to load the latest top three.";
+      }
+
+      function offlineStatus() {
+        status.textContent = best > player.synced
+          ? (persistent ? "Best score saved. It will sync when you’re back online." : "Keep this page open. Your best will sync when you’re back online.")
+          : "Play offline. Your next best score will sync when you reconnect.";
+      }
+
+      async function sync() {
+        clearTimeout(retryTimer);
+        const storedBest = read(BEST_KEY);
+        if (validScore(storedBest)) best = Math.max(best, storedBest);
+        const storedPlayer = read(PLAYER_KEY);
+        if (validPlayer(storedPlayer) && storedPlayer.id === player.id && validScore(storedPlayer.synced)) {
+          player.synced = Math.max(player.synced, storedPlayer.synced);
+        }
+        if (!navigator.onLine) { offlineStatus(); render(); return; }
+        if (busy) return;
+        busy = true;
+        const submitted = best > player.synced ? best : 0;
+        status.textContent = submitted ? "Syncing your best score…" : "Updating the leaderboard…";
+        let succeeded = false;
+        try {
+          const response = await fetch("/api/game/scores", {
+            method: submitted ? "POST" : "GET",
+            cache: "no-store",
+            ...(submitted ? {
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ player_id: player.id, score: submitted }),
+            } : {}),
+            signal: AbortSignal.timeout(10000),
+          });
+          if (!response.ok) throw new Error("Scores unavailable");
+          const data = await response.json();
+          if (!validBoard(data.leaderboard)) throw new Error("Invalid leaderboard");
+          if (submitted) {
+            if (!data.player || !validName(data.player.name) || !validScore(data.player.best_score) || data.player.best_score < submitted) throw new Error("Score not acknowledged");
+            player.synced = Math.max(player.synced, data.player.best_score);
+            player.name = data.player.name;
+            const latestBest = read(BEST_KEY);
+            const latestPlayer = read(PLAYER_KEY);
+            if (validPlayer(latestPlayer) && latestPlayer.id === player.id && validScore(latestPlayer.synced)) player.synced = Math.max(player.synced, latestPlayer.synced);
+            best = Math.max(best, data.player.best_score, validScore(latestBest) ? latestBest : 0);
+            save(PLAYER_KEY, player);
+            save(BEST_KEY, best);
+            onBest(best);
+          }
+          board = { rows: data.leaderboard, at: Date.now() };
+          save(BOARD_KEY, board);
+          status.textContent = submitted ? "Your best score is synced." : "Leaderboard up to date.";
+          succeeded = true;
+        } catch {
+          status.textContent = !navigator.onLine
+            ? "Best score saved. It will sync when you’re back online."
+            : best > player.synced ? "Couldn’t sync yet. Your best is saved; we’ll retry automatically." : "Leaderboard unavailable. We’ll retry automatically.";
+          if (!persistent) status.textContent += " Keep this page open to retain your score.";
+        } finally {
+          busy = false;
+          render();
+          if (!succeeded) retryTimer = setTimeout(sync, 30000);
+          else if (best > player.synced) retryTimer = setTimeout(sync, 0);
+        }
+      }
+
+      function record(score) {
+        if (!validScore(score) || score < 1) return;
+        const stored = read(BEST_KEY);
+        best = Math.max(best, score, validScore(stored) ? stored : 0);
+        save(BEST_KEY, best);
+        onBest(best);
+        void sync();
+      }
+      window.addEventListener("online", sync);
+      window.addEventListener("offline", () => { clearTimeout(retryTimer); offlineStatus(); render(); });
+      window.addEventListener("storage", (event) => { if (event.key === BEST_KEY || event.key === PLAYER_KEY) void sync(); });
+      document.addEventListener("visibilitychange", () => { if (!document.hidden) void sync(); });
+      render();
+      void sync();
+      return { record };
+    }
+  </script>
   <script>
     (() => {
       "use strict";
-      if (window.self !== window.top) document.body.classList.add("embedded");
+      const embedded = window.self !== window.top;
+      if (embedded) document.body.classList.add("embedded");
       const canvas = document.getElementById("game");
       const ctx = canvas.getContext("2d");
       const jumpButton = document.getElementById("jump");
@@ -68,10 +266,43 @@
       const ground = 194;
       const size = 30;
       let best = 0;
-      try { best = Math.max(0, Math.floor(Number(localStorage.getItem("peyyfi-jump-best")) || 0)); } catch { /* Storage may be disabled. */ }
+      try { const saved = Number(localStorage.getItem("peyyfi-jump-best")); best = Number.isInteger(saved) && saved >= 0 && saved <= 864000 ? saved : 0; } catch { /* Storage may be disabled. */ }
       const format = (value) => String(Math.floor(value)).padStart(5, "0");
       bestLabel.textContent = format(best);
+      const scores = createLeaderboard((value) => { best = value; bestLabel.textContent = format(best); });
       let state = "ready";
+      let gameVisible = !embedded;
+      const autoReturn = createAutoReturn({
+        online: navigator.onLine,
+        visible: gameVisible && !document.hidden,
+        onChange(seconds) {
+          if (embedded) {
+            window.parent.postMessage({ type: "peyyfi:return-countdown", seconds }, window.location.origin);
+          } else {
+            document.getElementById("auto-return-banner").hidden = seconds === null;
+            const countdown = document.getElementById("return-countdown");
+            countdown.hidden = seconds === null;
+            countdown.textContent = seconds === null ? "" : `${seconds}s`;
+            document.getElementById("auto-return-text").textContent = seconds === null ? "" : `You’re back online. Closing the game in ${seconds} seconds and returning home. Play or choose “Stay here” to keep it open.`;
+          }
+        },
+        onReturn() {
+          if (!navigator.onLine || document.hidden || state === "running") return;
+          if (embedded) window.parent.postMessage({ type: "peyyfi:return-home" }, window.location.origin);
+          else window.location.replace("/");
+        },
+      });
+      document.getElementById("stay-here").addEventListener("click", () => autoReturn.stay());
+      window.addEventListener("message", (event) => {
+        if (!embedded || event.origin !== window.location.origin || event.source !== window.parent) return;
+        const data = event.data;
+        if (!data || typeof data !== "object") return;
+        if (data.type === "peyyfi:stay") autoReturn.stay();
+        if (data.type === "peyyfi:game-visibility" && typeof data.visible === "boolean") {
+          gameVisible = data.visible;
+          autoReturn.setVisible(gameVisible && !document.hidden);
+        }
+      });
       let score = 0;
       let y = ground - size;
       let velocity = 0;
@@ -109,11 +340,13 @@
 
       function finish() {
         state = "over";
+        autoReturn.setPlaying(false);
         if (Math.floor(score) > best) {
           best = Math.floor(score);
           bestLabel.textContent = format(best);
           try { localStorage.setItem("peyyfi-jump-best", String(best)); } catch { /* Playing does not require storage. */ }
         }
+        scores.record(Math.min(864000, Math.floor(score)));
         message.textContent = "Nice run! Score " + Math.floor(score) + ". Try for a new best.";
         jumpButton.textContent = "Play again";
         pauseButton.disabled = true;
@@ -124,7 +357,7 @@
         const dt = lastTime ? Math.min((time - lastTime) / 1000, 0.035) : 0;
         lastTime = time;
         const speed = Math.min(440, 250 + score * 0.45);
-        score += dt * 10;
+        score = Math.min(864000, score + dt * 10);
         scoreLabel.textContent = format(score);
         distance += speed * dt;
         velocity += 1800 * dt;
@@ -146,6 +379,7 @@
 
       function resume() {
         state = "running";
+        autoReturn.setPlaying(true);
         lastTime = 0;
         message.textContent = "Keep moving. You’ve got this.";
         jumpButton.textContent = "Jump";
@@ -168,6 +402,7 @@
         if (state === "paused") { resume(); return; }
         if (state !== "running") return;
         state = "paused";
+        autoReturn.setPlaying(false);
         cancelAnimationFrame(frame);
         pauseButton.textContent = "Resume";
         jumpButton.textContent = "Resume game";
@@ -180,14 +415,18 @@
       canvas.addEventListener("pointerdown", (event) => { event.preventDefault(); canvas.focus(); jump(); });
       document.addEventListener("keydown", (event) => {
         if (event.repeat || event.altKey || event.ctrlKey || event.metaKey) return;
-        const onButton = event.target instanceof HTMLElement && event.target.closest("button, a");
+        const onButton = event.target instanceof HTMLElement && event.target.closest("button, a, input");
         if ((event.code === "Space" || event.code === "ArrowUp") && !onButton) { event.preventDefault(); jump(); }
         if (event.code === "KeyP") { event.preventDefault(); pause(); }
       });
-      document.addEventListener("visibilitychange", () => { if (document.hidden && state === "running") pause(); });
+      document.addEventListener("visibilitychange", () => {
+        autoReturn.setVisible(gameVisible && !document.hidden);
+        if (document.hidden && state === "running") pause();
+      });
       window.addEventListener("blur", () => { if (state === "running") pause(); });
       function connection() {
         const online = navigator.onLine;
+        autoReturn.setOnline(online);
         document.getElementById("connection").classList.toggle("connected", online);
         document.getElementById("connection-text").textContent = online ? "Connection available. Ready to return to the waitlist?" : "You’re offline. The game is ready to play.";
       }

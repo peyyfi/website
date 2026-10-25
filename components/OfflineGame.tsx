@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import "./OfflineGame.css";
 
 function subscribe(callback: () => void) {
@@ -16,6 +16,7 @@ export function OfflineGame() {
   const online = useSyncExternalStore(subscribe, () => navigator.onLine, () => true);
   const dialog = useRef<HTMLDialogElement>(null);
   const gameFrame = useRef<HTMLIFrameElement>(null);
+  const [returnIn, setReturnIn] = useState<number | null>(null);
 
   useEffect(() => {
     if ("serviceWorker" in navigator) {
@@ -25,8 +26,37 @@ export function OfflineGame() {
   }, []);
 
   useEffect(() => {
-    if (!online && !dialog.current?.open) dialog.current?.showModal();
+    if (!online && !dialog.current?.open) {
+      dialog.current?.showModal();
+      gameFrame.current?.contentWindow?.postMessage({ type: "peyyfi:game-visibility", visible: true }, window.location.origin);
+    }
   }, [online]);
+
+  useEffect(() => {
+    const popup = dialog.current;
+    const receive = (event: MessageEvent) => {
+      if (event.origin !== window.location.origin || event.source !== gameFrame.current?.contentWindow) return;
+      const data = event.data;
+      if (!data || typeof data !== "object") return;
+      if (data.type === "peyyfi:return-countdown" &&
+        (data.seconds === null || (Number.isInteger(data.seconds) && data.seconds >= 1 && data.seconds <= 10))) {
+        setReturnIn(data.seconds);
+      }
+      if (data.type === "peyyfi:return-home" && navigator.onLine && popup?.open) popup.close();
+    };
+    const closed = () => {
+      // A queued close event can arrive after a rapid disconnect reopens it.
+      if (popup?.open) return;
+      setReturnIn(null);
+      gameFrame.current?.contentWindow?.postMessage({ type: "peyyfi:game-visibility", visible: false }, window.location.origin);
+    };
+    window.addEventListener("message", receive);
+    popup?.addEventListener("close", closed);
+    return () => {
+      window.removeEventListener("message", receive);
+      popup?.removeEventListener("close", closed);
+    };
+  }, []);
 
   useEffect(() => {
     const frame = gameFrame.current;
@@ -40,6 +70,7 @@ export function OfflineGame() {
       observer = new ResizeObserver(resize);
       observer.observe(body);
       resize();
+      frame.contentWindow?.postMessage({ type: "peyyfi:game-visibility", visible: Boolean(dialog.current?.open) }, window.location.origin);
     };
     frame.addEventListener("load", fitGame);
     fitGame();
@@ -54,9 +85,20 @@ export function OfflineGame() {
       <div className="offline-dialog-header">
         <div>
           <h2 id="offline-title">{online ? "You’re back online" : "You’re offline"}</h2>
-          <p role="status">{online ? "Your connection is back. Finish your run or return to the waitlist." : "Take a little play break while your connection returns."}</p>
+          <p role="status">{online
+            ? returnIn !== null ? `Closing the game in ${returnIn} seconds and returning home. Play or choose “Stay here” to keep it open.` : "Your connection is back. Finish your run or return home."
+            : "Take a little play break while your connection returns."}</p>
         </div>
-        <button type="button" onClick={() => dialog.current?.close()}>Return to waitlist</button>
+        <div className="offline-dialog-actions">
+          {online && returnIn !== null && <button type="button" onClick={() => {
+            setReturnIn(null);
+            gameFrame.current?.contentWindow?.postMessage({ type: "peyyfi:stay" }, window.location.origin);
+          }}>Stay here</button>}
+          <button type="button" className="offline-return-button" onClick={() => dialog.current?.close()}>
+            Return to waitlist
+            {online && returnIn !== null && <span className="offline-return-countdown">{returnIn}s</span>}
+          </button>
+        </div>
       </div>
       <iframe ref={gameFrame} src="/offline.html" title="Peyyfi Jump offline game" className="offline-game-frame" />
     </dialog>

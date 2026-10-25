@@ -67,9 +67,9 @@ test("installation precaches the complete game before activating", async () => {
 });
 
 test("activation removes only obsolete game caches and controls existing tabs", async () => {
-  const sw = worker({ keys: ["peyyfi-offline-v0", "peyyfi-offline-v1", "other-cache"] });
+  const sw = worker({ keys: ["peyyfi-offline-v2", "peyyfi-offline-v3", "other-cache"] });
   await sw.lifecycle("activate");
-  assert.deepEqual(sw.deleted, ["peyyfi-offline-v0"]);
+  assert.deepEqual(sw.deleted, ["peyyfi-offline-v2"]);
   assert.equal(sw.claimed, true);
 });
 

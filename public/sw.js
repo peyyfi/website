@@ -1,5 +1,5 @@
 /* Cache only the self-contained game. Waitlist submissions always use the network. */
-const OFFLINE_CACHE = "peyyfi-offline-v1";
+const OFFLINE_CACHE = "peyyfi-offline-v3";
 const OFFLINE_PAGE = "/offline.html";
 
 self.addEventListener("install", (event) => {
