@@ -1,0 +1,201 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#e7e9ec">
+  <title>Peyyfi Jump · Offline</title>
+  <style>
+    :root { color-scheme: light; font-family: system-ui, sans-serif; color: #171717; background: #e7e9ec; }
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100svh; display: grid; place-items: center; padding: 28px 20px; }
+    main { width: min(100%, 760px); }
+    .brand { margin: 0 0 32px; font-weight: 750; font-size: 24px; letter-spacing: -1px; }
+    .brand span { color: #b33400; }
+    .eyebrow { color: #b33400; text-transform: uppercase; font-size: 11px; font-weight: 650; letter-spacing: .12em; }
+    h1 { margin: 10px 0 12px; font-size: clamp(36px, 7vw, 58px); letter-spacing: -.06em; line-height: 1.05; }
+    .description { margin: 0; max-width: 520px; font-size: 15px; line-height: 1.6; color: #50545b; }
+    .scores { display: flex; justify-content: space-between; gap: 12px; margin: 28px 0 12px; font-size: 12px; color: #50545b; font-variant-numeric: tabular-nums; }
+    .scores strong { display: block; margin-top: 3px; color: #171717; font-size: 22px; }
+    .board { position: relative; overflow: hidden; border: 1px solid #d4d7dc; border-radius: 20px; background: #f7f8f9; }
+    canvas { display: block; width: 100%; height: auto; aspect-ratio: 720 / 240; touch-action: manipulation; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    button { min-height: 48px; border: 0; border-radius: 12px; padding: 12px 24px; font: inherit; font-size: 14px; font-weight: 650; color: #171717; background: #fc4c02; cursor: pointer; touch-action: manipulation; }
+    button:hover { background: #ee4600; }
+    button:focus-visible, a:focus-visible, canvas:focus-visible { outline: 3px solid #b33400; outline-offset: 4px; }
+    .controls { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
+    #pause { background: #d8dbdf; }
+    button:disabled { opacity: .5; cursor: default; }
+    .help { margin: 16px 0 0; font-size: 12px; color: #50545b; line-height: 1.6; }
+    #message { min-height: 24px; margin: 12px 0 0; font-size: 14px; font-weight: 600; }
+    .connection { display: flex; align-items: center; gap: 8px; margin: 30px 0 12px; font-size: 12px; color: #50545b; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: #b33400; }
+    .connected .dot { background: #207044; }
+    #return { display: inline-block; min-height: 44px; padding: 12px 0; color: #b33400; font-size: 14px; text-underline-offset: 4px; }
+    body.embedded { min-height: 0; padding: 24px; }
+    .embedded .brand, .embedded .connection, .embedded #return { display: none; }
+    .embedded h1 { font-size: clamp(32px, 6vw, 44px); }
+    @media (max-width: 420px) { body, body.embedded { padding: 20px 16px; } .scores { margin-top: 20px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <p class="brand">peyyfi<span>.</span></p>
+    <p class="eyebrow">A little play break</p>
+    <h1>Keep the good<br>things moving.</h1>
+    <p class="description">Meet Peyyfi Jump. Hop over the hurdles, beat your best and keep going while your internet catches up.</p>
+    <div class="scores"><div>Score<strong id="score">00000</strong></div><div>Personal best<strong id="best">00000</strong></div></div>
+    <div class="board"><canvas id="game" width="720" height="240" tabindex="0" aria-label="Peyyfi Jump. Press Space or Arrow Up, or tap, to jump over hurdles. Press P to pause.">Use the Jump button to hop over hurdles.</canvas></div>
+    <p id="message" role="status" aria-live="polite">Ready when you are.</p>
+    <div class="controls"><button id="jump" type="button">Start game</button><button id="pause" type="button" disabled>Pause</button></div>
+    <p class="help">Space / ↑ or tap to jump · P to pause · Your best score stays on this device.</p>
+    <p id="connection" class="connection" role="status"><span class="dot"></span><span id="connection-text">You’re offline. The game is ready to play.</span></p>
+    <a id="return" href="/">Return to the waitlist →</a>
+    <noscript><p>Enable JavaScript to play. You can return to the waitlist when your connection is back.</p></noscript>
+  </main>
+  <script>
+    (() => {
+      "use strict";
+      if (window.self !== window.top) document.body.classList.add("embedded");
+      const canvas = document.getElementById("game");
+      const ctx = canvas.getContext("2d");
+      const jumpButton = document.getElementById("jump");
+      const pauseButton = document.getElementById("pause");
+      const scoreLabel = document.getElementById("score");
+      const bestLabel = document.getElementById("best");
+      const message = document.getElementById("message");
+      const ground = 194;
+      const size = 30;
+      let best = 0;
+      try { best = Math.max(0, Math.floor(Number(localStorage.getItem("peyyfi-jump-best")) || 0)); } catch { /* Storage may be disabled. */ }
+      const format = (value) => String(Math.floor(value)).padStart(5, "0");
+      bestLabel.textContent = format(best);
+      let state = "ready";
+      let score = 0;
+      let y = ground - size;
+      let velocity = 0;
+      let distance = 0;
+      let spawnIn = 1.3;
+      let hurdles = [];
+      let lastTime = 0;
+      let frame = 0;
+
+      function draw() {
+        ctx.clearRect(0, 0, 720, 240);
+        ctx.strokeStyle = "#d4d7dc";
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(0, ground + 1); ctx.lineTo(720, ground + 1); ctx.stroke();
+        ctx.fillStyle = "#d4d7dc";
+        for (let i = 0; i < 15; i++) ctx.fillRect((i * 58 - distance % 58 + 720) % 720, ground + 17 + (i % 3) * 3, 12, 2);
+        // A simple wallet character, drawn locally so there are no image requests.
+        ctx.fillStyle = "#fc4c02";
+        ctx.beginPath(); ctx.roundRect(76, y, size, size, 7); ctx.fill();
+        ctx.fillStyle = "#171717";
+        ctx.fillRect(94, y + 8, 4, 4);
+        ctx.fillRect(97, y + 19, 9, 4);
+        ctx.fillStyle = "#303237";
+        for (const hurdle of hurdles) {
+          ctx.beginPath(); ctx.roundRect(hurdle.x, ground - hurdle.height, hurdle.width, hurdle.height, 4); ctx.fill();
+          ctx.fillStyle = "#777b82"; ctx.fillRect(hurdle.x + 5, ground - hurdle.height + 6, hurdle.width - 10, 3); ctx.fillStyle = "#303237";
+        }
+        if (state !== "running") {
+          ctx.fillStyle = "#50545b";
+          ctx.font = "500 15px system-ui, sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText(state === "over" ? "Nice run. One more?" : state === "paused" ? "Take your time. Paused." : "A little jump goes a long way.", 360, 85);
+        }
+      }
+
+      function finish() {
+        state = "over";
+        if (Math.floor(score) > best) {
+          best = Math.floor(score);
+          bestLabel.textContent = format(best);
+          try { localStorage.setItem("peyyfi-jump-best", String(best)); } catch { /* Playing does not require storage. */ }
+        }
+        message.textContent = "Nice run! Score " + Math.floor(score) + ". Try for a new best.";
+        jumpButton.textContent = "Play again";
+        pauseButton.disabled = true;
+      }
+
+      function tick(time) {
+        if (state !== "running") return;
+        const dt = lastTime ? Math.min((time - lastTime) / 1000, 0.035) : 0;
+        lastTime = time;
+        const speed = Math.min(440, 250 + score * 0.45);
+        score += dt * 10;
+        scoreLabel.textContent = format(score);
+        distance += speed * dt;
+        velocity += 1800 * dt;
+        y = Math.min(ground - size, y + velocity * dt);
+        if (y === ground - size) velocity = 0;
+        spawnIn -= dt;
+        if (spawnIn <= 0) {
+          hurdles.push({ x: 740, width: 20 + Math.random() * 14, height: 26 + Math.random() * 16 });
+          spawnIn = 1.1 + Math.random() * 0.7;
+        }
+        for (const hurdle of hurdles) {
+          hurdle.x -= speed * dt;
+          if (76 + size - 5 > hurdle.x + 3 && 76 + 5 < hurdle.x + hurdle.width - 3 && y + size - 3 > ground - hurdle.height + 3) finish();
+        }
+        hurdles = hurdles.filter((hurdle) => hurdle.x + hurdle.width > 0);
+        draw();
+        if (state === "running") frame = requestAnimationFrame(tick);
+      }
+
+      function resume() {
+        state = "running";
+        lastTime = 0;
+        message.textContent = "Keep moving. You’ve got this.";
+        jumpButton.textContent = "Jump";
+        pauseButton.textContent = "Pause";
+        pauseButton.disabled = false;
+        frame = requestAnimationFrame(tick);
+      }
+
+      function jump() {
+        if (state === "paused") { resume(); return; }
+        if (state === "ready" || state === "over") {
+          score = 0; y = ground - size; velocity = 0; distance = 0; spawnIn = 1.3; hurdles = [];
+          scoreLabel.textContent = format(0);
+          resume();
+        }
+        if (y === ground - size) velocity = -650;
+      }
+
+      function pause() {
+        if (state === "paused") { resume(); return; }
+        if (state !== "running") return;
+        state = "paused";
+        cancelAnimationFrame(frame);
+        pauseButton.textContent = "Resume";
+        jumpButton.textContent = "Resume game";
+        message.textContent = "Paused. Pick up where you left off.";
+        draw();
+      }
+
+      jumpButton.addEventListener("click", jump);
+      pauseButton.addEventListener("click", pause);
+      canvas.addEventListener("pointerdown", (event) => { event.preventDefault(); canvas.focus(); jump(); });
+      document.addEventListener("keydown", (event) => {
+        if (event.repeat || event.altKey || event.ctrlKey || event.metaKey) return;
+        const onButton = event.target instanceof HTMLElement && event.target.closest("button, a");
+        if ((event.code === "Space" || event.code === "ArrowUp") && !onButton) { event.preventDefault(); jump(); }
+        if (event.code === "KeyP") { event.preventDefault(); pause(); }
+      });
+      document.addEventListener("visibilitychange", () => { if (document.hidden && state === "running") pause(); });
+      window.addEventListener("blur", () => { if (state === "running") pause(); });
+      function connection() {
+        const online = navigator.onLine;
+        document.getElementById("connection").classList.toggle("connected", online);
+        document.getElementById("connection-text").textContent = online ? "Connection available. Ready to return to the waitlist?" : "You’re offline. The game is ready to play.";
+      }
+      window.addEventListener("online", connection);
+      window.addEventListener("offline", connection);
+      connection();
+      draw();
+    })();
+  </script>
+</body>
+</html>

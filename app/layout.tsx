@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 
 import "./globals.css";
 import { SplashScreen } from "../components/SplashScreen";
+import { OfflineGame } from "../components/OfflineGame";
 import { isPreview, site } from "../lib/site";
 
 const spaceGrotesk = localFont({
@@ -52,7 +53,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={spaceGrotesk.variable} data-scroll-behavior="smooth">
-      <body><SplashScreen />{children}</body>
+      <body><SplashScreen />{children}<OfflineGame /></body>
     </html>
   );
 }
