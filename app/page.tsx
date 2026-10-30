@@ -1,7 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
+import { SpaceDots } from "../components/SpaceDots";
 import { WaitlistForm } from "./waitlist-form";
-import { WalletPreview } from "../components/WalletPreview";
 import { HomeScreenPreview } from "../components/HomeScreenPreview";
 import { ScrollReveals } from "../components/ScrollReveals";
 import { site } from "../lib/site";
@@ -40,10 +40,11 @@ export default function Home() {
       <ScrollReveals />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(structuredData).replace(/</g, "\\u003c") }} />
       <header className="site-header">
-        <Link className="brand-lockup" href="/" aria-label="Peyyfi home"><Image className="brand-symbol" data-header-logo src={site.logo} alt="" width={38} height={38} preload /><span>Peyyfi</span></Link>
+        <Link className="brand-lockup" href="/" aria-label="Peyyfi home"><Image className="brand-symbol" data-header-logo src="/peyyfi-mark-reverse.svg" alt="" width={38} height={38} preload /><span>Peyyfi</span></Link>
         <span className="launch-label"><span />Early access</span>
       </header>
-      <section className="hero" aria-labelledby="waitlist-heading">
+      <section className="hero hero-copy-only" aria-labelledby="waitlist-heading">
+        <SpaceDots className="hero-dots" fine />
         <div className="hero-copy">
           <p className="eyebrow">Your everyday USDC &amp; USDT wallet</p>
           <h1 id="waitlist-heading" data-hero-reveal="headline">Your money,<br /><span>made simple.</span></h1>
@@ -51,7 +52,6 @@ export default function Home() {
           <div id="join-waitlist" className="waitlist-anchor" data-hero-reveal="form"><WaitlistForm /></div>
           <ul className="feature-list" aria-label="Peyyfi features"><li>One wallet</li><li>Easy transfers</li><li>Virtual cards</li></ul>
         </div>
-        <WalletPreview />
       </section>
       <HomeScreenPreview />
       <section className="product-details" aria-labelledby="product-heading">
