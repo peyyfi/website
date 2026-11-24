@@ -86,7 +86,7 @@ html[data-hero-entrance="ready"] [data-hero-reveal] { animation: hero-entrance 6
 [data-scroll-reveal="pending"] { opacity: 0; transform: translateY(32px); }
 [data-scroll-reveal="visible"] { animation: section-reveal 750ms cubic-bezier(.22, .61, .36, 1) both; }
 @keyframes section-reveal { from { opacity: 0; transform: translateY(32px); } to { opacity: 1; transform: none; } }
-.home-screen-preview { width: min(100%, 1260px); margin-inline: auto; padding: 48px 0 32px; border-top: 1px solid var(--line); text-align: center; }
+.home-screen-preview { width: min(100%, 1260px); margin-inline: auto; padding: 48px 0 32px; text-align: center; }
 .home-screen-preview .eyebrow { margin-bottom: 16px; }
 .home-screen-preview h2 { margin: 0; font-size: clamp(44px, 5.3vw, 76px); font-weight: 600; line-height: 1.05; letter-spacing: -.06em; }
 .home-screen-description { margin: 16px 0 0; color: var(--muted); font-size: 20px; line-height: 1.5; letter-spacing: -.025em; }
